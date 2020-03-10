@@ -1,12 +1,9 @@
 import React from 'react'
 import { getMeteo } from '../src/service/meteo'
-//import { meteoTown, meteoService } from '../src/config/react_config'
-import {meteoTown} from '../src/config/react_config'
 import {
     View,
     Image,
     Alert,
-    Modal,
     ScrollView,
     Text,
     TouchableOpacity,
@@ -20,54 +17,54 @@ import Icon from 'react-native-vector-icons/Entypo'
 import Iconf from 'react-native-vector-icons/FontAwesome'
 import Iconf5 from 'react-native-vector-icons/FontAwesome5'
 import { Table, TableWrapper, Row, Rows, Col, Cols, Cell } from 'react-native-table-component'
-import { TextInput } from 'react-native-gesture-handler';
+import {meteoTown} from '../src/config/react_config'
 
 var link = "";
-var first1 = null;
 var town = null;
 
-export default class FirstDay extends React.Component {
+export default class ThirdDay extends React.Component {
     useKeepAwake;
     constructor(props) {
         super(props);
         this.state = {
             isLoading: true,
-            data: null,
             day0: null,
             temp1: null,
             temp2: null,
             temp3: null,
             temp4: null,
             vent: null,
-            hour: null,
-            alert_visibility: false,
-            town : null,
+            hour: null
         }
     }
 
     updateTemp() 
     {
+        const result = Object.values(this.state.day0.hourly_data);
+
         if (global.Temp == "F")
             {
                 this.setState({temp1: ((this.state.day0.tmax * 9/5) + 32) + "°F"});
                 this.setState({temp2: ((this.state.day0.tmin * 9/5) + 32) + "°F"});
-                this.setState({temp3: ((this.state.data.tmp * 9/5) + 32) + "°F"});
+                this.setState({temp3: ((result[0].TMP2m * 9/5) + 32) + "°F"});
             }
             else{
                 this.setState({temp1: this.state.day0.tmax + "°C"});
                 this.setState({temp2: this.state.day0.tmin + "°C"});
-                this.setState({temp3: this.state.data.tmp + "°C"});
+                this.setState({temp3: result[0].TMP2m + "°C"});
             } 
     }
 
     updateVent()
     {
+        const result = Object.values(this.state.day0.hourly_data);
+
         if (global.Vent == "m/s")
             {
-                this.setState({vent: (this.state.data.wnd_spd  / 3.6) + " m/s"});
+                this.setState({vent: (result[0].WNDSPD10m  / 3.6) + " m/s"});
             }
             else{
-                this.setState({vent: this.state.data.wnd_spd  + " km/h"});
+                this.setState({vent: result[0].WNDSPD10m  + " km/h"});
             }
     }
 
@@ -92,7 +89,6 @@ export default class FirstDay extends React.Component {
             }
           )
     }
-
     updateMeteo()
     {
         town = global.town != null ? global.town : meteoTown;
@@ -106,7 +102,7 @@ export default class FirstDay extends React.Component {
             Alert.alert("Erreur", "Erreur de réception des données")
         });
     }
-    
+
     updateAll()
     {
         this.updateVent();
@@ -117,66 +113,50 @@ export default class FirstDay extends React.Component {
     }
 
     componentDidMount() {
-        first1 = this;
         getMeteo(meteoTown).then(data => {
             this.setState({
                 isLoading: false,
-                data: data.current_condition,
-                day0: data.fcst_day_0,
+                day0: data.fcst_day_2,
             });
         }, error => {
             Alert.alert("Erreur", "Erreur de réception des données")
         });
     }
 
-
-
-    
-    ShowDialog(visible)
-    {
-        this.setState({alert_visibility: visible});
-    }
-
-    SearchTown()
-    {
-        Alert.alert("Message", "Il est l'heure de commencer");
-    }
-
     static navigationOptions = ({ navigation }) => {
         return {
-            title: global.town != null ?
+            title:  global.town != null ?
             town : meteoTown,
             headerStyle: {
                 backgroundColor: global.Color
             },
             headerRight: (
-            
-            <View style={styles.container}>
-         
-            <TouchableOpacity onPress={() => navigation.navigate('Search')} >
-            <Text
-              style={{
-                color: 'gray',
-              }}>
-               <Iconf name="search" size={20} color="#000"/>
-            </Text>
-          </TouchableOpacity>
-            <TouchableOpacity style={{marginLeft: 13}} onPress = {
-                    () => navigation.navigate("Settings") } >
-                <Text style = {
-                    {
-                        color: 'gray',
-                    }
-                } >
-                <Icon name = "dots-three-vertical"
-                size = { 20 }
-                color = "#000"/>
-                </Text> 
-                </TouchableOpacity>
-                </View>
+                <View style={styles.container}>
+             
+                <TouchableOpacity onPress={() => navigation.navigate('Search')} >
+                <Text
+                  style={{
+                    color: 'gray',
+                  }}>
+                   <Iconf name="search" size={20} color="#000"/>
+                </Text>
+              </TouchableOpacity>
+                <TouchableOpacity style={{marginLeft: 13}} onPress = {
+                        () => navigation.navigate("Settings") } >
+                    <Text style = {
+                        {
+                            color: 'gray',
+                        }
+                    } >
+                    <Icon name = "dots-three-vertical"
+                    size = { 20 }
+                    color = "#000"/>
+                    </Text> 
+                    </TouchableOpacity>
+                    </View>
             ),
             headerLeft: ( <TouchableOpacity onPress = {
-                    () => navigation.navigate("Main") } >
+                () => navigation.navigate("Main") } >
                 <Text style = {
                     {
                         color: 'gray',
@@ -192,11 +172,10 @@ export default class FirstDay extends React.Component {
     };
 
     hoursDisplay = () => {
-        var currentHour = new Date().getHours();
         const result = Object.values(this.state.day0.hourly_data);
         let table = [];
 
-        for (let i = currentHour; i < 24; i++) {
+        for (let i = 0; i < 24; i++) {
             
             let children = []
             
@@ -241,13 +220,15 @@ export default class FirstDay extends React.Component {
                 </View>
             )
         } else {
-            if (this.state.data.condition.includes("Ensoleillé")) {
+            const result = Object.values(this.state.day0.hourly_data);
+
+            if (result[0].CONDITION.includes("Ensoleillé")) {
                 link = "https://static.actu.fr/uploads/2018/02/AdobeStock-soleil-et-nuage-854x612.jpg";
-            } else if (this.state.data.condition.includes("Pluie")) {
+            } else if (result[0].CONDITION.includes("Pluie")) {
                 link = "https://cdn.pixabay.com/photo/2014/04/05/11/39/rain-316579_960_720.jpg";
-            } else if (this.state.data.condition.includes("Neige")) {
+            } else if (result[0].CONDITION.includes("Neige")) {
                 link = "http://4everstatic.com/images/nature/paysages/paysage-enneige,-foret-149465.jpg";
-            } else if (this.state.data.condition.includes("Nuit")) {
+            } else if (result[0].CONDITION.includes("Nuit")) {
                 link = "http://www.treillieres.fr/fileadmin/images/Treillieres/0-Photos_accueil/ACTUALITES/INFOS_PRATIQUES/2019_01/storm-clouds-426271_960_720.jpg";
             } else {
                 link = "http://www.acseipica.fr/wp-content/uploads/2015/01/background-e1421612524371.jpg";
@@ -273,16 +254,16 @@ export default class FirstDay extends React.Component {
                             <Text  style = { styles.textPrincipal } > { this.state.temp3 }</Text> 
                         </View> 
                         <Image style = {{ width: 100, height: 100, alignContent: 'center' }} 
-                        source = {{ uri: this.state.data.icon } }/> 
+                        source = {{ uri: result[0].ICON } }/> 
                     </View>
 
                     <View style = { styles.viewAlignVertically2 } >
                         <View style = { styles.viewAlignVertically } >
                             <Iconf style = { styles.iconStyle } name = "dashboard" size = { 18 } color = "#000" />
-                            <Text style = { styles.desctext } > Pression: { this.state.data.pressure } </Text> 
+                            <Text style = { styles.desctext } > Pression: { result[0].PRMSL } </Text> 
                         </View> 
                         <Text style = { styles.meteodescText } > 
-                            { this.state.data.condition } 
+                            { result[0].CONDITION } 
                         </Text> 
                     </View>
                 </View>
@@ -290,7 +271,7 @@ export default class FirstDay extends React.Component {
                 <View>
                     <View style = { styles.viewAlign } >
                         <Iconf5 style = { styles.iconStyle } name = "cloud-rain" size = { 18 } color = "#000" />
-                        <Text style = { styles.desctext } > Humidité: { this.state.data.humidity } % </Text> 
+                        <Text style = { styles.desctext } > Humidité: { result[0].RH2m } % </Text> 
                     </View> 
                     <View style = { styles.viewAlign } >
                         <Iconf5 style = { styles.iconStyle } name = "wind" size = { 18 } color = "#000" />
@@ -324,7 +305,7 @@ export default class FirstDay extends React.Component {
                             }
                         </Table>
                     </ScrollView>
-                </View>
+                </View> 
                 </ScrollView> 
             </ImageBackground>
             );
@@ -430,5 +411,4 @@ const styles = StyleSheet.create({
       alignContent: "center",
       width:50
       },
-
 })

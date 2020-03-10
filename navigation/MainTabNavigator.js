@@ -3,76 +3,93 @@ import { Platform } from 'react-native';
 import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
 
 import TabBarIcon from '../components/TabBarIcon';
+import Search from '../screens/Search'
 import Firstday from '../screens/Firstday';
-import LinksScreen from '../screens/LinksScreen';
+import Secondday from '../screens/Secondday';
+import Thirdday from '../screens/Thirdday';
 import SettingsScreen from '../screens/SettingsScreen';
+import Iconf5 from 'react-native-vector-icons/FontAwesome5'
+
 
 const config = Platform.select({
-  web: { headerMode: 'screen' },
-  default: {},
+    web: { headerMode: 'screen' },
+    default: {},
 });
 
-const HomeStack = createStackNavigator(
-  {
-    Home: Firstday,
-  },
-  config
+const FirstStack = createStackNavigator({
+        First: Firstday,
+    },
+    config
 );
 
-HomeStack.navigationOptions = {
-  tabBarLabel: "Mercredi",
-  tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={
-        Platform.OS === 'ios'
-          ? `ios-information-circle${focused ? '' : '-outline'}`
-          : 'md-information-circle'
-      }
-    />
-  ),
+FirstStack.navigationOptions = {
+    tabBarLabel: "Aujourd'hui",
+    tabBarIcon: ({ focused }) => ( <
+        Iconf5 name = "dice-one"
+        size = { 18 }
+        color = "#00A2E8" / >
+    ),
 };
 
-HomeStack.path = '';
+FirstStack.path = '';
 
-const LinksStack = createStackNavigator(
-  {
-    Links: LinksScreen,
-  },
-  config
+const SecondStack = createStackNavigator({
+        Second: Secondday,
+    },
+    config
 );
 
-LinksStack.navigationOptions = {
-  tabBarLabel: 'Liens',
-  tabBarIcon: ({ focused }) => (
-    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-link' : 'md-link'} />
-  ),
+SecondStack.navigationOptions = {
+    tabBarLabel: 'Demain',
+    tabBarIcon: ({ focused }) => ( <
+        Iconf5 name = "dice-two"
+        size = { 18 }
+        color = "#00A2E8" / >
+    ),
 };
 
-LinksStack.path = '';
+SecondStack.path = '';
 
-const SettingsStack = createStackNavigator(
-  {
-    Settings: SettingsScreen,
-  },
-  config
+const SettingsStack = createStackNavigator({
+        Settings: SettingsScreen,
+    },
+    config
 );
-
-SettingsStack.navigationOptions = {
-  tabBarLabel: 'Paramètres',
-  tabBarIcon: ({ focused }) => (
-    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-options' : 'md-options'} />
-  ),
-};
 
 SettingsStack.path = '';
 
+const SearchStack = createStackNavigator({
+    Search: Search,
+},
+config
+);
+
+SearchStack.path = '';
+
+const ThirdStack = createStackNavigator({
+        Third: Thirdday,
+    },
+    config
+);
+
+ThirdStack.navigationOptions = {
+    tabBarLabel: 'Apres Demain',
+    tabBarIcon: ({ focused }) => ( <
+        Iconf5 name = "dice-three"
+        size = { 18 }
+        color = "#00A2E8" / >
+    ),
+};
+
+ThirdStack.path = '';
+
 const tabNavigator = createBottomTabNavigator({
-  HomeStack,
-  LinksStack,
-  SettingsStack,
+    FirstStack,
+    SecondStack,
+    ThirdStack
 });
 
 tabNavigator.path = '';
 
+export { SettingsStack, SearchStack };
 export default tabNavigator;
